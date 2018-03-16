@@ -10,9 +10,9 @@ def main():
         print('Usage: python esc.py ecsDataPath inputFilePath resultFilePath')
 #        exit(1)
     # Read the input files
-    inputFilePath = 'D:\\installation manual\\Ubuntu14_04\\share_file\\FAQV3.5\\sdk\\sdk\\sdk-python\\src\\ecs\\input_data.txt'
-    ecsDataPath = 'D:\\installation manual\\Ubuntu14_04\\share_file\\FAQV3.5\\sdk\\sdk\\sdk-python\\src\\ecs\\train_data.txt'
-    resultFilePath = 'D:\\installation manual\\Ubuntu14_04\\share_file\\FAQV3.5\\sdk\\sdk\\sdk-python\\src\\ecs\\output_data.txt'
+    inputFilePath = 'E:\\Document\\Personal\\Postgraduate\\game\\huawei_soft\\huawei\\ecs\\soft_game\\input_data.txt'
+    ecsDataPath = 'E:\\Document\\Personal\\Postgraduate\\game\\huawei_soft\\huawei\\ecs\\soft_game\\train_data.txt'
+    resultFilePath = 'E:\\Document\\Personal\\Postgraduate\\game\\huawei_soft\\huawei\\ecs\\soft_game\\output_data.txt'
     ecs_infor_array = read_lines(ecsDataPath)
     input_file_array = read_lines(inputFilePath)
     # implementation the function predictVm
@@ -25,12 +25,10 @@ def main():
         write_result(predic_result, resultFilePath)
     print('main function end.')
 
-
 def write_result(array, outpuFilePath):
     with open(outpuFilePath, 'w') as output_file:
         for item in array:
             output_file.write("%s\n" % item)
-
 
 def read_lines(file_path):
     if os.path.exists(file_path):
