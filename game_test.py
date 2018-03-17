@@ -4,7 +4,7 @@ Created on Fri Mar 16 21:52:26 2018
 
 @author: Administrator
 """
-
+#注意两台电脑的文件的路径不一样，所以需要注意区分
 #用来更方便精心观察变量调试使用# coding=utf-8
 import sys
 import os
@@ -123,42 +123,44 @@ def simple_linear_regression(dataset):
 
     # Get the dataset header names
     # Calculating the mean of the square feet and the price readings
+    data_date_predict = [[0 for i in range(51,58)] for i in range(len(dataset)+1)]
+    data_date_predict[0][:] = range(51,58)
+    for i in range(len(dataset)):
+        square_feet_mean = cal_mean(range(1,50))
+        price_mean = cal_mean(dataset[i][1:50])
+        square_feet_variance = cal_variance(range(1,50))
+        price_variance = cal_variance(dataset[i][1:50])
     
-    square_feet_mean = cal_mean(range(1,50))
-    price_mean = cal_mean(dataset[0][1:50])
-    square_feet_variance = cal_variance(range(1,50))
-    price_variance = cal_variance(dataset[0][1:50])
-
-    # Calculating the regression
-    covariance_of_price_and_square_feet = cal_covariance(range(1,50),dataset[0][1:50])
-    w1 = covariance_of_price_and_square_feet / float(square_feet_variance)
-
-    w0 = price_mean - (w1 * square_feet_mean)
-
-    # Predictions
-    data_predict = [0 for i in range(7)]
-    date_to_predict = [i for i in range(51,58)]
-    for i in range(len(data_predict)):
-        data_predict[i] = w0 + w1 * date_to_predict[i]
-    print(w0,w1,data_predict)
+        # Calculating the regression
+        covariance_of_price_and_square_feet = cal_covariance(range(1,50),dataset[0][1:50])
+        w1 = covariance_of_price_and_square_feet / float(square_feet_variance)
+    
+        w0 = price_mean - (w1 * square_feet_mean)
+    
+        # Predictions
+        for j in range(len(data_date_predict[0][:])):
+            data_date_predict[i+1][j] = w0 + w1 * data_date_predict[0][j]
+            if data_date_predict[i+1][j]<0:
+               data_date_predict[i+1][j] = 0
+    print(data_date_predict)
+    return data_date_predict
 # Do your work from here#
 to_predict_list = []
 date_flag = 1
 result = []
-inputFilePath = 'E:\\Document\\Personal\\Postgraduate\\game\\huawei_soft\\huawei\\ecs\\soft_game\\input_data.txt'
-ecsDataPath = 'E:\\Document\\Personal\\Postgraduate\\game\\huawei_soft\\huawei\\ecs\\soft_game\\train_data.txt'
-resultFilePath = 'E:\\Document\\Personal\\Postgraduate\\game\\huawei_soft\\huawei\\ecs\\soft_game\\output_data.txt'
+inputFilePath = 'E:\coding\python\soft_game\\input_data.txt'
+ecsDataPath = 'E:\coding\python\soft_game\\train_data.txt'
+resultFilePath = 'E:\coding\python\soft_game\\output_data.txt'
 ecs_infor_array = read_lines(ecsDataPath)
 input_file_array = read_lines(inputFilePath)
 ecs_lines = ecs_infor_array
 input_lines = input_file_array
-
 for line in input_lines: 
         if 'flavor' in line:
             odom = line.split()
             list1 = list(odom)
             to_predict_list.append(list1[0])
-date_table = [ [0 for i in range(51)] for i in range(len(to_predict_list))]
+date_table = [[0 for i in range(51)] for i in range(len(to_predict_list))]
 date_count = [] 
 for i in range(len(to_predict_list)):
     date_table[i][0] = to_predict_list[i]  
@@ -172,7 +174,13 @@ for line1 in ecs_lines:
                 if Train_list2[2][5:7] == '02':
                     date_flag = int(Train_list2[2][8:10]) + 31
                 date_table[i][date_flag] += 1                 
-simple_linear_regression(date_table)
+data_date_predict = simple_linear_regression(date_table)
+predicted_data = []
+for i in range(1,len(data_date_predict)):
+    predicted_data.append(sum(data_date_predict[i][:]))
+for count in range(len(predicted_data)):#将预测结果圆整，只要数据大于整数部分就加一
+    predicted_data[count] = int(predicted_data[count])+1
+
 if ecs_lines is None:
     print('ecs information is none')
 if input_lines is None:

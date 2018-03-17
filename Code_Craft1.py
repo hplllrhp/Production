@@ -7,7 +7,7 @@ Created on Wed Mar 14 23:12:57 2018
 
 #对txt进行处理，统计出flavor1到5出现过的数量
 to_predict_list = []
-with open('input_5flavors_cpu_7days.txt', 'r') as f:  
+with open('input_data.txt', 'r') as f:  
     data = f.readlines()  #txt中所有字符串读入data  
     for line in data: 
         if 'flavor' in line:
@@ -22,7 +22,7 @@ date_flag = 1
 date_flag_new = 1
 Train_list_samedate = []
 #先找出有几个需要检测的flavor，len函数，然后在条件句中
-with open('TrainData_2015.1.1_2015.2.19.txt', 'r') as f1:  
+with open('Train_Data.txt', 'r') as f1:  
     data = f1.readlines()  #txt中所有字符串读入data  
     for line1 in data: 
         odom1 = line1.split() 
@@ -33,8 +33,9 @@ with open('TrainData_2015.1.1_2015.2.19.txt', 'r') as f1:
                     date_flag = int(Train_list2[2][8:10])
                 if Train_list2[2][5:7] == '02':
                     date_flag = int(Train_list2[2][8:10]) + 30
-                date_table[i][date_flag] += 1           
-            
+                date_table[i][date_flag] += 1 
+          
+print(len(date_table))            
             
             
 #        if date_flag == date_flag_new:
