@@ -41,7 +41,7 @@ def get_server_property(inputFilePath):
 server_property.property = get_server_property(inputFilePath)
 #print(server_property.property[0])
 print(server_property.property)
-
+#--------------------放置函数开始----------------------
 
 
 
