@@ -320,7 +320,7 @@ int JudgeRest(const Server server, const vector<Flaln> InputFlavor, int InputNum
 	return flag;
 }
 
-//将预测的五种虚拟机的动态数组传进去，选出需要放置的虚拟机种类
+//将预测的五种虚拟机的动态数组传进去，选出需要放置的虚拟机种类。形参i如果是0优化CPU，如果是1优化内存
 int SelectFlavorToSet(vector<Flaln> InputFlavor, int i, int InputNum)
 {
 	int fn = 0;

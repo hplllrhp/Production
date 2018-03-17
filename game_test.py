@@ -151,9 +151,9 @@ def simple_linear_regression(dataset):
 to_predict_list = []
 date_flag = 1
 result = []
-inputFilePath = 'E:\\Document\\Personal\\Postgraduate\\game\\huawei_soft\\huawei\\ecs\\soft_game\\input_data.txt'
-ecsDataPath = 'E:\\Document\\Personal\\Postgraduate\\game\\huawei_soft\\huawei\\ecs\\soft_game\\train_data.txt'
-resultFilePath = 'E:\\Document\\Personal\\Postgraduate\\game\\huawei_soft\\huawei\\ecs\\soft_game\\output_data.txt'
+inputFilePath = 'E:\\coding\\python\\soft_game\\input_data.txt'
+ecsDataPath = 'E:\\coding\\python\\soft_game\\train_data.txt'
+resultFilePath = 'E:\\coding\\python\\soft_game\\output_data.txt'
 ecs_infor_array = read_lines(ecsDataPath)
 input_file_array = read_lines(inputFilePath)
 ecs_lines = ecs_infor_array
