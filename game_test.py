@@ -147,6 +147,7 @@ def simple_linear_regression(dataset):
             if data_date_predict[i+1][j]<0:
                data_date_predict[i+1][j] = 0
     return data_date_predict
+
 # Do your work from here#
 to_predict_list = []
 date_flag = 1
@@ -184,6 +185,7 @@ for i in range(1,len(data_date_predict)):
 for count in range(len(predicted_data)):#将预测结果圆整，只要数据大于整数部分就加一
     predicted_data[count] = int(predicted_data[count])+1
 print(predicted_data)
+
 if ecs_lines is None:
     print('ecs information is none')
 if input_lines is None:

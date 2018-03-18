@@ -61,7 +61,7 @@ def get_flavor_property(inputFilePath):
 def JudgeRest(InputNum,ToSerNum):
     flag = 0
     for i in range(InputNum):
-        if(flavor_property.rest[i] != 0 and flavor_property.SingleVmFlag != 0):
+        if(flavor_property.rest[i] != 0 and flavor_property.SingleVmFlag[i] != 0):
             if(server_property.cpu[ToSerNum] >= flavor_property.cpu[i] and server_property.memory[ToSerNum] >= flavor_property.memory[i]):
                flag = 1
                break
@@ -72,7 +72,7 @@ def SelectFlavorToSet(InputNum,i):
     size = 0
     a = []    #//存储还没分配完的虚拟机的类型标号，后续就是在这里面筛选
     for j in range(InputNum):
-        if(flavor_property.rest[j] != 0 and flavor_property.SingleVmFlag != 0):
+        if(flavor_property.rest[j] != 0 and flavor_property.SingleVmFlag[j] != 0):
             a.append(j)
     size = len(a)
     fn = a[0]
@@ -155,7 +155,7 @@ while (judge_flag):
         server_property.memory.append(128)
         server_property.ser_name.append('server')
         server_property.flavor.append([0 for i in range(5)])
-        for i in InputNum:
+        for i in range(InputNum):
             flavor_property.SingleVmFlag[i] = 1
         ToSerNum += 1
     else:
