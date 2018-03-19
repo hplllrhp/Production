@@ -1,5 +1,5 @@
+
 # coding=utf-8
-import datetime 
 def cal_mean(readings):
     """
     Function to calculate the mean value of the input readings
