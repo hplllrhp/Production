@@ -138,10 +138,6 @@ def get_server_property(input_lines):
         temp_list[2] = 0
     else:
         temp_list[2] = 1
-    for line in input_lines:
-        line = line.strip('\n')
-        if(is_valid_date(line)):
-            temp_list.append(str(line))
     return temp_list
 def get_flavor_property(input_lines):
     for line in input_lines:
@@ -155,7 +151,7 @@ def get_flavor_property(input_lines):
     return flavor_property
 def is_valid_date(date_string):
     try:
-        datetime.datetime.strptime(date_string,"%Y-%m-%d %H:%M:%S")
+        datetime.datetime.strptime(date_string,"%Y-%m-%d %H:%M:%S\n")
         return True
     except ValueError:
         return False
@@ -218,19 +214,25 @@ def predict_vm(ecs_lines, input_lines):
     # Do your work from here#
     result = []
     predicted_data = []#存放最后的预测结果
+    temp_pridict_days = []
     if ecs_lines is None:
         print('ecs information is none')
         return result
     if input_lines is None:
         print('input file information is none')
         return result
+    for line in input_lines:
+        if(is_valid_date(line)):
+            temp_pridict_days.append(str(line))
+    temp_pridict_days[0] = temp_pridict_days[0].strip('\n')
+    temp_pridict_days[1] = temp_pridict_days[0].strip('\n')
     server_info = get_server_property(input_lines)
     flavor_property = get_flavor_property(input_lines)
     server_property.cpu.append(int(server_info[0]))
     server_property.memory.append(int(server_info[1]))
     server_property.Optimize = server_info[2]
-    begin_date = datetime.datetime.strptime(server_info[3],"%Y-%m-%d %H:%M:%S")
-    end_date = datetime.datetime.strptime(server_info[4],"%Y-%m-%d %H:%M:%S")
+    begin_date = datetime.datetime.strptime(temp_pridict_days[0],"%Y-%m-%d %H:%M:%S")
+    end_date = datetime.datetime.strptime(temp_pridict_days[1],"%Y-%m-%d %H:%M:%S")
     total_predict_days = (end_date - begin_date).days
     temp_first_date =((ecs_lines[0].split())[2] + ' ' + (ecs_lines[0].split()[3])).strip('\n')
     first_date = datetime.datetime.strptime(temp_first_date,"%Y-%m-%d %H:%M:%S")
