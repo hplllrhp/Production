@@ -2,10 +2,20 @@
 
 5
 flavor1 1 1024
-flavor2 1 2048
-flavor3 1 4096
-flavor4 2 2048
-flavor5 20 4096
+flavor2 2 2048
+flavor3 3 4096
+flavor4 5 2048
+flavor5 2 4096
+flavor6 2 2048
+flavor7 8 4096
+flavor8 7 2048
+flavor9 9 4096
+flavor10 11 2048
+flavor11 12 4096
+flavor12 13 2048
+flavor13 13 4096
+flavor14 10 4096
+flavor15 15 4096
 
 CPU
 

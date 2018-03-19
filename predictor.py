@@ -88,7 +88,7 @@ def predict_target_value(x, b0, b1):
 #    return rmse
 
 
-def simple_linear_regression(dataset):
+def simple_linear_regression(dataset,total_train_days,total_predict_days):
     """
     Implementing the simple linear regression without using any python library
     :param dataset:
@@ -97,18 +97,17 @@ def simple_linear_regression(dataset):
 
     # Get the dataset header names
     # Calculating the mean of the square feet and the price readings
-    data_date_predict = [[0 for i in range(51,58)] for i in range(len(dataset)+1)]
-    data_date_predict[0][:] = range(51,58)
+    data_date_predict = [[0 for i in range(total_train_days+1,total_train_days+1+total_train_days)] for i in range(len(dataset)+1)]
+    data_date_predict[0][:] = range(total_train_days+1,total_train_days+1+total_predict_days)
     for i in range(len(dataset)):
-        square_feet_mean = cal_mean(range(1,50))
-        price_mean = cal_mean(dataset[i][1:50])
-        square_feet_variance = cal_variance(range(1,50))
+        square_feet_mean = cal_mean(range(1,total_train_days))
+        price_mean = cal_mean(dataset[i][1:total_train_days])
+        square_feet_variance = cal_variance(range(1,total_train_days))
 #        price_variance = cal_variance(dataset[i][1:50])
         
         # Calculating the regression
-        covariance_of_price_and_square_feet = cal_covariance(range(1,50),dataset[0][1:50])
+        covariance_of_price_and_square_feet = cal_covariance(range(1,total_train_days),dataset[0][1:total_train_days])
         w1 = covariance_of_price_and_square_feet / float(square_feet_variance)
-    
         w0 = price_mean - (w1 * square_feet_mean)
     
         # Predictions
@@ -131,11 +130,19 @@ class server_property:
         self.memory = []
         self.flavor = []        # flavor[0]表示要放的第1种虚拟机的台数，这里用下标直接代替了虚拟机种类，很明显可以flavor.resize(InputNum)
         self.ser_name = ['server']
+        self.Optimize = 0;
 
 def get_server_property(input_lines):
     temp_list = input_lines[0].split()
+    if('CPU\n' in input_lines):
+        temp_list[2] = 0
+    else:
+        temp_list[2] = 1
+    for line in input_lines:
+        line = line.strip('\n')
+        if(is_valid_date(line)):
+            temp_list.append(str(line))
     return temp_list
-
 def get_flavor_property(input_lines):
     for line in input_lines:
         if 'flavor' in line:
@@ -146,6 +153,12 @@ def get_flavor_property(input_lines):
             flavor_property.memory.append(int(int(temp_list[2])/1024))
             flavor_property.SingleVmFlag.append(1)
     return flavor_property
+def is_valid_date(date_string):
+    try:
+        datetime.datetime.strptime(date_string,"%Y-%m-%d %H:%M:%S")
+        return True
+    except ValueError:
+        return False
 
 #print(server_property.property)
 #--------------------放置函数开始----------------------
@@ -189,7 +202,6 @@ def SelectFlavorToSet(InputNum,i):
                 else:
                     fn = fn
     return fn
-
 def Judge(InputNum):
     flag = 1
     num = 0
@@ -202,7 +214,6 @@ def Judge(InputNum):
 
 flavor_property = flavor_property()
 server_property = server_property()
-
 def predict_vm(ecs_lines, input_lines):
     # Do your work from here#
     result = []
@@ -217,21 +228,31 @@ def predict_vm(ecs_lines, input_lines):
     flavor_property = get_flavor_property(input_lines)
     server_property.cpu.append(int(server_info[0]))
     server_property.memory.append(int(server_info[1]))
+    server_property.Optimize = server_info[2]
+    begin_date = datetime.datetime.strptime(server_info[3],"%Y-%m-%d %H:%M:%S")
+    end_date = datetime.datetime.strptime(server_info[4],"%Y-%m-%d %H:%M:%S")
+    total_predict_days = (end_date - begin_date).days
+    temp_first_date =((ecs_lines[0].split())[2] + ' ' + (ecs_lines[0].split()[3])).strip('\n')
+    first_date = datetime.datetime.strptime(temp_first_date,"%Y-%m-%d %H:%M:%S")
+    temp_last_date =((ecs_lines[-1].split())[2] + ' ' + (ecs_lines[-1].split()[3])).strip('\n')
+    last_date = datetime.datetime.strptime(temp_last_date,"%Y-%m-%d %H:%M:%S")
+    total_train_days = (last_date - first_date).days + 1
     server_property.flavor = [[0 for i in range(len(flavor_property.name))] for i in range(1)]
-    date_table = [[0 for i in range(51)] for i in range(len(flavor_property.name))]
+    date_table = [[0 for i in range(total_train_days+1)] for i in range(len(flavor_property.name))]
+    print('be',begin_date,'en',end_date,'total_p',total_predict_days,'fi',first_date,'la',last_date,'total_t',total_train_days)
     for i in range(len(flavor_property.name)):
         date_table[i][0] = flavor_property.name[i]  
+    interval_days = 0
     for line1 in ecs_lines: 
             odom1 = line1.split() 
             Train_list2 = list(odom1)
             for i in range(len(flavor_property.name)):
-                if flavor_property.name[i] in Train_list2: 
-                    if Train_list2[2][5:7] == '01':
-                        date_flag = int(Train_list2[2][8:10])
-                    if Train_list2[2][5:7] == '02':
-                        date_flag = int(Train_list2[2][8:10]) + 31
-                    date_table[i][date_flag] += 1 
-    data_date_predict = simple_linear_regression(date_table)
+                if flavor_property.name[i] in Train_list2:
+                    temp = (Train_list2[2]+' '+Train_list2[3]).strip('\n')
+                    flavor_date = datetime.datetime.strptime(temp,"%Y-%m-%d %H:%M:%S")
+                    interval_days = (flavor_date - first_date).days + 1
+                    date_table[i][interval_days] += 1 
+    data_date_predict = simple_linear_regression(date_table,total_train_days,total_predict_days)
     for i in range(1,len(data_date_predict)):
         predicted_data.append(sum(data_date_predict[i][:]))
     for count in range(len(predicted_data)):#将预测结果圆整，只要数据大于整数部分就加一
@@ -241,7 +262,7 @@ def predict_vm(ecs_lines, input_lines):
         result.append(str(flavor_property.name[i]) + ' ' + str(predicted_data[i]))
     flavor_property.total = predicted_data
     flavor_property.rest = predicted_data
-    OptimizeFlag = 0
+    OptimizeFlag = server_property.Optimize
     server_property.ser_num = 0
     judge_flag = Judge(len(flavor_property.name))
     ToSerNum = 0;#//设置需要配置的服务器，ToSerNum = 0即第1个服务器
