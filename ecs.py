@@ -2,7 +2,6 @@
 import sys
 import os
 import predictor
-print('safenot')
 def main():
     print('main function begin.')
     if len(sys.argv) != 4:
