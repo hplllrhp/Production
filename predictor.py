@@ -236,11 +236,9 @@ def predict_vm(ecs_lines, input_lines):
         predicted_data.append(sum(data_date_predict[i][:]))
     for count in range(len(predicted_data)):#将预测结果圆整，只要数据大于整数部分就加一
         predicted_data[count] = int(predicted_data[count])+1
-    print('1,predicted_data',predicted_data)
-    result.append(len(flavor_property.name))
+    result.append(sum(predicted_data))
     for i in range(len(flavor_property.name)):
         result.append(str(flavor_property.name[i]) + ' ' + str(predicted_data[i]))
-    print('result',result)
     flavor_property.total = predicted_data
     flavor_property.rest = predicted_data
     OptimizeFlag = 0
@@ -276,25 +274,13 @@ def predict_vm(ecs_lines, input_lines):
             ToSerNum += 1
         else:
             judge_flag = 0
-    print(server_property.cpu,server_property.flavor,server_property.memory,server_property.ser_name)        
     result.append(' ')
     result.append(len(server_property.ser_name))
-    temp_list_string = []
     for i in range(len(server_property.ser_name)):
+        temp_list_string = str(i+1)+' '
         for j in range(len(flavor_property.name)):
-            temp_list_string.append(str(server_property.flavor[i][j]))
-        
-        result.append(str(i+1) + ' ' + str(flavor_property.name[i]) + ' ' + str(server_property.flavor[i][]))
-        
-
-    
-#    for index, item in ecs_lines:
-#        values = item.split(" ")
-#        uuid = values[0]
-#        flavorName = values[1]
-#        createTime = values[2]
-
-#    for index, item in input_lines:
-#        print("index of input data")
-    
-    return 'SAFE'        
+            if(server_property.flavor[i][j] != 0):
+                temp_list_string = temp_list_string + (str(flavor_property.name[j]) + ' ' + str(server_property.flavor[i][j])) + ' '
+        result.append(temp_list_string)
+    print(result)
+    return result       

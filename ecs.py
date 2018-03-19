@@ -23,12 +23,10 @@ def main():
         predic_result.append("NA")
         write_result(predic_result, resultFilePath)
     print('main function end.')
-
 def write_result(array, outpuFilePath):
     with open(outpuFilePath, 'w') as output_file:
         for item in array:
             output_file.write("%s\n" % item)
-
 def read_lines(file_path):
     if os.path.exists(file_path):
         array = []
@@ -39,7 +37,5 @@ def read_lines(file_path):
     else:
         print( 'file not exist: '+ file_path) 
         return None
-
-
 if __name__ == "__main__":
     main()

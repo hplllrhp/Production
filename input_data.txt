@@ -5,7 +5,7 @@ flavor1 1 1024
 flavor2 1 2048
 flavor3 1 4096
 flavor4 2 2048
-flavor5 2 4096
+flavor5 20 4096
 
 CPU
 
