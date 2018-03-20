@@ -2,6 +2,7 @@
 import datetime 
 import copy
 import random
+
 def cal_mean(readings):
     """
     Function to calculate the mean value of the input readings
@@ -12,6 +13,7 @@ def cal_mean(readings):
     number_of_readings = len(readings)
     mean = readings_total / float(number_of_readings)
     return mean
+
 
 
 def cal_variance(readings):
@@ -27,7 +29,8 @@ def cal_variance(readings):
     # mean difference squared readings
     mean_difference_squared_readings = [pow((reading - readings_mean), 2) for reading in readings]
     variance = sum(mean_difference_squared_readings)
-    return variance / float(len(readings) - 1)
+#    return variance / float(len(readings) - 1)
+    return variance / float(len(readings))
 
 
 def cal_covariance(readings_1, readings_2):
@@ -43,7 +46,8 @@ def cal_covariance(readings_1, readings_2):
     covariance = 0.0
     for i in range(readings_size):
         covariance += (readings_1[i] - readings_1_mean) * (readings_2[i] - readings_2_mean)
-    return covariance / float(readings_size - 1)
+#    return covariance / float(readings_size - 1)
+    return covariance / float(readings_size)
 
 
 def cal_simple_linear_regression_coefficients(x_readings, y_readings):
@@ -74,26 +78,21 @@ def predict_target_value(x, b0, b1):
     return b0 + b1 * x
 
 
-#def cal_rmse(actual_readings, predicted_readings):
-#    """
-#    Calculating the root mean square error
-#    :param actual_readings:
-#    :param predicted_readings:
-#    :return:
-#    """
-#    square_error_total = 0.0
-#    total_readings = len(actual_readings)
-#    for i in xrange(0, total_readings):
-#        error = predicted_readings[i] - actual_readings[i]
-#        square_error_total += pow(error, 2)
-#    rmse = square_error_total / float(total_readings)
-#    return rmse
+def cal_rmse(actual_readings, predicted_readings):
+    """
+    Calculating the root mean square error
+    :param actual_readings:
+    :param predicted_readings:
+    :return:
+    """
+    square_error_total = 0.0
+    total_readings = len(actual_readings)
+    for i in xrange(0, total_readings):
+        error = predicted_readings[i] - actual_readings[i]
+        square_error_total += pow(error, 2)
+    rmse = square_error_total / float(total_readings)
+    return rmse
 
-def Get_Average(list):
-	sum = 0
-	for item in list:
-		sum += item
-	return sum/len(list)
 def simple_linear_regression(dataset,total_train_days,total_predict_days):
     """
     Implementing the simple linear regression without using any python library
@@ -112,7 +111,7 @@ def simple_linear_regression(dataset,total_train_days,total_predict_days):
 #        price_variance = cal_variance(dataset[i][1:50])
         
         # Calculating the regression
-        covariance_of_price_and_square_feet = cal_covariance(range(1,total_train_days),dataset[i][1:total_train_days])
+        covariance_of_price_and_square_feet = cal_covariance(range(1,total_train_days),dataset[0][1:total_train_days])
         w1 = covariance_of_price_and_square_feet / float(square_feet_variance)
         w0 = price_mean - (w1 * square_feet_mean)
     
@@ -121,11 +120,30 @@ def simple_linear_regression(dataset,total_train_days,total_predict_days):
             data_date_predict[i+1][j] = w0 + w1 * data_date_predict[0][j]
             if data_date_predict[i+1][j]<0:
                data_date_predict[i+1][j] = 0
-    for i in range(1,len(data_date_predict)):
-        for j in range(len(data_date_predict[0])):
-            data_date_predict[i][j] /= len(data_date_predict[0])
 #    print('data_date_predict',data_date_predict)
     return data_date_predict
+
+#这是剔除异常值算法，某个数值比均值超出了3个方差就认为是异常值，将这个值赋值为平均值
+#也可以考虑将这个值赋值为这列表中最大的那个值，之后尝试
+def excluding_outliers(input_list):
+    mean = cal_mean(input_list)
+    variance = pow((cal_variance(input_list)),0.5)
+    for i in range(len(input_list)):
+        if ((input_list[i]-mean)>3*variance) or ((mean - input_list[i])>3*variance):
+            input_list[i] = mean
+    output_list = copy.deepcopy(input_list)
+    print(output_list)
+    return output_list
+
+#这是累积算法，列表后面的非0值的数值等于数值的总和
+def get_sum_list(input_list):
+    output_list = copy.deepcopy(input_list)
+    for i in range(len(input_list)):
+        for j in range(1,len(input_list[0])):
+            if(output_list[i][j]!=0):
+                output_list[i][j] = sum(input_list[i][1:j+1])
+    return output_list
+
 class flavor_property:
     def __init__(self):
         self.name = []          # 虚拟机类型
@@ -219,6 +237,8 @@ def Judge(InputNum):
     return flag
 flavor_property = flavor_property()
 server_property = server_property()
+
+
 def predict_vm(ecs_lines, input_lines):
     # Do your work from here#
     result = []
@@ -244,7 +264,6 @@ def predict_vm(ecs_lines, input_lines):
     total_train_days = (last_date - first_date).days + 1
     server_property.flavor = [[0 for i in range(len(flavor_property.name))] for i in range(1)]
     date_table = [[0 for i in range(total_train_days+1)] for i in range(len(flavor_property.name))]
-    print('be',begin_date,'en',end_date,'total_p',total_predict_days,'fi',first_date,'la',last_date,'total_t',total_train_days)
     for i in range(len(flavor_property.name)):
         date_table[i][0] = flavor_property.name[i]  
     interval_days = 0
@@ -257,23 +276,13 @@ def predict_vm(ecs_lines, input_lines):
                     flavor_date = datetime.datetime.strptime(temp,"%Y-%m-%d %H:%M:%S")
                     interval_days = (flavor_date - first_date).days + 1
                     date_table[i][interval_days] += 1
-    temp_date_table = copy.deepcopy(date_table)
-    for i in range(len(temp_date_table)):
-        for j in range(1,len(temp_date_table[0])):
-            if(date_table[i][j]!=0):
-                date_table[i][j] = sum(temp_date_table[i][1:j+1])
-    for i in range(len(date_table)):
-        predicted_data.append(int(max(date_table[i][1:])*(total_predict_days)/(len(date_table[0])-1)))
-        a = random.randint(0,9)
-        b = random.randint(0,a)
-        c = random.randint(0,b)
-        predicted_data[i] += c
-#    print('date_table',date_table)
-#    data_date_predict = simple_linear_regression(date_table,total_train_days,total_predict_days)
-#    for i in range(1,len(data_date_predict)):
-#        predicted_data.append(sum(data_date_predict[i][:]))
-#    for count in range(len(predicted_data)):#将预测结果圆整，只要数据大于整数部分就加一
-#        predicted_data[count] = int(predicted_data[count])+1
+    try_date_table = excluding_outliers(date_table)
+    print('try_date_table',try_date_table,'\n','date_table',date_table)
+    data_date_predict = simple_linear_regression(date_table,total_train_days,total_predict_days)
+    for i in range(1,len(data_date_predict)):
+        predicted_data.append(sum(data_date_predict[i][:]))
+    for count in range(len(predicted_data)):#将预测结果圆整，只要数据大于整数部分就加一
+        predicted_data[count] = int(predicted_data[count])+1
     print(predicted_data)
     result.append(sum(predicted_data))
     for i in range(len(flavor_property.name)):
