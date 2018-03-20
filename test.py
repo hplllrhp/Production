@@ -34,7 +34,8 @@ def cal_variance(readings):
     return variance / float(len(readings))
 
 list2 = [0,0,0,1,2,0,0,0,0,0,0,0,0,0,1,0,0,2,0,0,12,0,0,0,1,0,1,0,0,0,0,0]
-list3 = [[1,2,3],[4,5,6]]
+list3 = [[0,0,0,1,2,0,0,0,0,0,0,0,0,0,1,0,0,2,0,0,12,0,0,0,1,0,1,0,0,0,0,0],[0,0,0,1,2,0,0,0,0,0,0,0,0,0,1,0,0,2,0,0,12,0,0,0,1,0,1,0,0,0,0,0]]
+
 def excluding_outliers(input_list):
     mean = cal_mean(input_list)
     variance = pow((cal_variance(input_list)),0.5)
@@ -45,7 +46,19 @@ def excluding_outliers(input_list):
     print(output_list)
     return output_list
 
-print(excluding_outliers(list3))
+
+
+def excluding_data_table(input_table):
+    for i in range(len(input_table)):
+        mean = cal_mean(input_table[i][:])
+        variance = pow((cal_variance(input_table[i][:])),0.5)
+        for j in range(len(input_table[i])):
+            if ((input_table[i][j]-mean)>3*variance) or ((mean - input_table[i][j])>3*variance):
+                input_table[i][j] = mean
+    output_table = copy.deepcopy(input_table)
+    return output_table
+         
+print(excluding_data_table(list3))
 
 
 

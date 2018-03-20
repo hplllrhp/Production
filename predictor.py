@@ -105,13 +105,13 @@ def simple_linear_regression(dataset,total_train_days,total_predict_days):
     data_date_predict = [[0 for i in range(total_train_days+1,total_train_days+1+total_predict_days)] for i in range(len(dataset)+1)]
     data_date_predict[0][:] = range(total_train_days+1,total_train_days+1+total_predict_days)
     for i in range(len(dataset)):
-        square_feet_mean = cal_mean(range(1,total_train_days))
-        price_mean = cal_mean(dataset[i][1:total_train_days])
-        square_feet_variance = cal_variance(range(1,total_train_days))
+        square_feet_mean = cal_mean(range(0,total_train_days))
+        price_mean = cal_mean(dataset[i][0:total_train_days])
+        square_feet_variance = cal_variance(range(0,total_train_days))
 #        price_variance = cal_variance(dataset[i][1:50])
         
         # Calculating the regression
-        covariance_of_price_and_square_feet = cal_covariance(range(1,total_train_days),dataset[0][1:total_train_days])
+        covariance_of_price_and_square_feet = cal_covariance(range(0,total_train_days),dataset[0][:])
         w1 = covariance_of_price_and_square_feet / float(square_feet_variance)
         w0 = price_mean - (w1 * square_feet_mean)
     
@@ -135,6 +135,17 @@ def excluding_outliers(input_list):
     print(output_list)
     return output_list
 
+#对二维列表处理，剔除异常值
+def excluding_data_table(input_table):
+    for i in range(len(input_table)):
+        mean = cal_mean(input_table[i][:])
+        variance = pow((cal_variance(input_table[i][:])),0.5)
+        for j in range(len(input_table[i])):
+            if ((input_table[i][j]-mean)>3*variance) or ((mean - input_table[i][j])>3*variance):
+                input_table[i][j] = mean+variance
+    output_table = copy.deepcopy(input_table)
+    return output_table
+        
 #这是累积算法，列表后面的非0值的数值等于数值的总和
 def get_sum_list(input_list):
     output_list = copy.deepcopy(input_list)
@@ -263,9 +274,7 @@ def predict_vm(ecs_lines, input_lines):
     last_date = datetime.datetime.strptime(temp_last_date,"%Y-%m-%d %H:%M:%S")
     total_train_days = (last_date - first_date).days + 1
     server_property.flavor = [[0 for i in range(len(flavor_property.name))] for i in range(1)]
-    date_table = [[0 for i in range(total_train_days+1)] for i in range(len(flavor_property.name))]
-    for i in range(len(flavor_property.name)):
-        date_table[i][0] = flavor_property.name[i]  
+    date_table = [[0 for i in range(total_train_days)] for i in range(len(flavor_property.name))] 
     interval_days = 0
     for line1 in ecs_lines: 
             odom1 = line1.split() 
@@ -274,10 +283,9 @@ def predict_vm(ecs_lines, input_lines):
                 if flavor_property.name[i] in Train_list2:
                     temp = (Train_list2[2]+' '+Train_list2[3]).strip('\n')
                     flavor_date = datetime.datetime.strptime(temp,"%Y-%m-%d %H:%M:%S")
-                    interval_days = (flavor_date - first_date).days + 1
-                    date_table[i][interval_days] += 1
-    try_date_table = excluding_outliers(date_table)
-    print('try_date_table',try_date_table,'\n','date_table',date_table)
+                    interval_days = (flavor_date - first_date).days+1#间隔日期要加一，比如第一天的间隔日期是0天，但是实际是第一天
+                    date_table[i][interval_days-1] += 1#interval_days-1因为列表从0开始
+#    try_date_table = excluding_data_table(date_table)
     data_date_predict = simple_linear_regression(date_table,total_train_days,total_predict_days)
     for i in range(1,len(data_date_predict)):
         predicted_data.append(sum(data_date_predict[i][:]))
