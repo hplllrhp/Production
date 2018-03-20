@@ -1,23 +1,16 @@
 56 128 1200
 
-5
+8
 flavor1 1 1024
 flavor2 2 2048
 flavor3 3 4096
-flavor4 5 2048
+flavor4 3 4096
 flavor5 2 4096
-flavor6 2 2048
-flavor7 8 4096
-flavor8 7 2048
-flavor9 9 4096
-flavor10 11 2048
-flavor11 12 4096
-flavor12 13 2048
-flavor13 13 4096
-flavor14 10 4096
-flavor15 15 4096
+flavor6 5 4096
+flavor7 4 4096
+flavor8 6 4096
 
-MEM
+CPU
 
 2015-02-20 00:00:00
 2015-02-27 00:00:00

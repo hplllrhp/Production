@@ -1,5 +1,7 @@
 # coding=utf-8
 import datetime 
+import copy
+import random
 def cal_mean(readings):
     """
     Function to calculate the mean value of the input readings
@@ -87,7 +89,11 @@ def predict_target_value(x, b0, b1):
 #    rmse = square_error_total / float(total_readings)
 #    return rmse
 
-
+def Get_Average(list):
+	sum = 0
+	for item in list:
+		sum += item
+	return sum/len(list)
 def simple_linear_regression(dataset,total_train_days,total_predict_days):
     """
     Implementing the simple linear regression without using any python library
@@ -97,7 +103,7 @@ def simple_linear_regression(dataset,total_train_days,total_predict_days):
 
     # Get the dataset header names
     # Calculating the mean of the square feet and the price readings
-    data_date_predict = [[0 for i in range(total_train_days+1,total_train_days+1+total_train_days)] for i in range(len(dataset)+1)]
+    data_date_predict = [[0 for i in range(total_train_days+1,total_train_days+1+total_predict_days)] for i in range(len(dataset)+1)]
     data_date_predict[0][:] = range(total_train_days+1,total_train_days+1+total_predict_days)
     for i in range(len(dataset)):
         square_feet_mean = cal_mean(range(1,total_train_days))
@@ -106,7 +112,7 @@ def simple_linear_regression(dataset,total_train_days,total_predict_days):
 #        price_variance = cal_variance(dataset[i][1:50])
         
         # Calculating the regression
-        covariance_of_price_and_square_feet = cal_covariance(range(1,total_train_days),dataset[0][1:total_train_days])
+        covariance_of_price_and_square_feet = cal_covariance(range(1,total_train_days),dataset[i][1:total_train_days])
         w1 = covariance_of_price_and_square_feet / float(square_feet_variance)
         w0 = price_mean - (w1 * square_feet_mean)
     
@@ -115,6 +121,10 @@ def simple_linear_regression(dataset,total_train_days,total_predict_days):
             data_date_predict[i+1][j] = w0 + w1 * data_date_predict[0][j]
             if data_date_predict[i+1][j]<0:
                data_date_predict[i+1][j] = 0
+    for i in range(1,len(data_date_predict)):
+        for j in range(len(data_date_predict[0])):
+            data_date_predict[i][j] /= len(data_date_predict[0])
+#    print('data_date_predict',data_date_predict)
     return data_date_predict
 class flavor_property:
     def __init__(self):
@@ -246,12 +256,25 @@ def predict_vm(ecs_lines, input_lines):
                     temp = (Train_list2[2]+' '+Train_list2[3]).strip('\n')
                     flavor_date = datetime.datetime.strptime(temp,"%Y-%m-%d %H:%M:%S")
                     interval_days = (flavor_date - first_date).days + 1
-                    date_table[i][interval_days] += 1 
-    data_date_predict = simple_linear_regression(date_table,total_train_days,total_predict_days)
-    for i in range(1,len(data_date_predict)):
-        predicted_data.append(sum(data_date_predict[i][:]))
-    for count in range(len(predicted_data)):#将预测结果圆整，只要数据大于整数部分就加一
-        predicted_data[count] = int(predicted_data[count])+1
+                    date_table[i][interval_days] += 1
+    temp_date_table = copy.deepcopy(date_table)
+    for i in range(len(temp_date_table)):
+        for j in range(1,len(temp_date_table[0])):
+            if(date_table[i][j]!=0):
+                date_table[i][j] = sum(temp_date_table[i][1:j+1])
+    for i in range(len(date_table)):
+        predicted_data.append(int(max(date_table[i][1:])*(total_predict_days)/(len(date_table[0])-1)))
+        a = random.randint(0,9)
+        b = random.randint(0,a)
+        c = random.randint(0,b)
+        predicted_data[i] += c
+#    print('date_table',date_table)
+#    data_date_predict = simple_linear_regression(date_table,total_train_days,total_predict_days)
+#    for i in range(1,len(data_date_predict)):
+#        predicted_data.append(sum(data_date_predict[i][:]))
+#    for count in range(len(predicted_data)):#将预测结果圆整，只要数据大于整数部分就加一
+#        predicted_data[count] = int(predicted_data[count])+1
+    print(predicted_data)
     result.append(sum(predicted_data))
     for i in range(len(flavor_property.name)):
         result.append(str(flavor_property.name[i]) + ' ' + str(predicted_data[i]))
