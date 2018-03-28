@@ -63,7 +63,22 @@ def random_creat_matrix(x,y,start=0,step=1):
          N.append(F)  
          F=[]  
      return N 
+def matrix_add(x,y):
+    temp = creat_matrix(len(x),len(x[0]))
+    for i in range(len(x)):
+        for j in range(len(x[0])):
+            temp[i][j] = x[i][j] + y[i][j]
+    return temp
 
+def matrix_sub(x,y):
+    temp = creat_matrix(len(x),len(x[0]))
+    for i in range(len(x)):
+        for j in range(len(x[0])):
+            temp[i][j] = x[i][j] - y[i][j]
+    return temp
+a = [[1,2,3]]
+b = [[1,2,3]]
+print(matrix_sub(a,b))  
 length_flavor = 50
 train_x = [i for i in range(1,length_flavor+1)]
 train_y = []
@@ -108,15 +123,9 @@ for j in range(10):
     layer_1 = sigmoid(matrixMul2(x,synapse_0) + matrixMul2([layer_1_values[-1]],synapse_h))  
     layer_2 = sigmoid(matrixMul2(layer_1,synapse_1))  
     
-    layer_2_error = y - layer_2
+    layer_2_error = matrix_sub(y,layer_2)
     layer_2_deltas.append((layer_2_error)*sigmoid_output_to_derivative(layer_2))  
     overallError += abs(layer_2_error[0])  
 
-a = [[1,2,3]]
-b = [[2,1,3]]
-print(a - b)
-a = [[1,2,3]]
-b = [[2,1,3]]
-print(a - b)
-print()
+
 
