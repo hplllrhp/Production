@@ -16,7 +16,6 @@ def sigmoid_np(x):
     output = 1/(1+np.exp(-x))  
     return output  
 print(sigmoid_np(np.array([1,2,3])))
-
 def sigmoid_output_to_derivative_np(output):  
     return output*(1-output)  
 print(sigmoid_output_to_derivative_np(np.array([1,2,3])))
@@ -116,4 +115,8 @@ for j in range(10):
 a = [[1,2,3]]
 b = [[2,1,3]]
 print(a - b)
+a = [[1,2,3]]
+b = [[2,1,3]]
+print(a - b)
+print()
 
