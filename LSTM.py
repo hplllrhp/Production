@@ -16,6 +16,10 @@ def sigmoid_np(x):
     output = 1/(1+np.exp(-x))  
     return output  
 print(sigmoid_np(np.array([1,2,3])))
+
+def sigmoid_output_to_derivative_np(output):  
+    return output*(1-output)  
+print(sigmoid_output_to_derivative_np(np.array([1,2,3])))
 # compute sigmoid nonlinearity  
 def sigmoid(x): 
     output = []
@@ -27,7 +31,13 @@ def sigmoid(x):
 print(sigmoid([[1,2,3]]))
 # convert output of sigmoid function to its derivative  
 def sigmoid_output_to_derivative(output):  
-    return output*(1-output)  
+    lay_output = []
+    temp = 0
+    for i in range(len(output[0])):
+        temp = output[0][i]*(1-output[0][i]) 
+        lay_output.append(temp)
+    return [lay_output]  
+print(sigmoid_output_to_derivative([[1,2,3]]))
 def matrixMul2(A, B):
     return [[sum(a * b for a, b in zip(a, b)) for b in zip(*B)] for a in A]
 a = [[1]]
@@ -101,9 +111,9 @@ for j in range(10):
     
     layer_2_error = y - layer_2
     layer_2_deltas.append((layer_2_error)*sigmoid_output_to_derivative(layer_2))  
-    overallError += np.abs(layer_2_error[0])  
+    overallError += abs(layer_2_error[0])  
 
-
-
-
+a = [[1,2,3]]
+b = [[2,1,3]]
+print(a - b)
 
