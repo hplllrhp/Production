@@ -8,18 +8,31 @@ Created on Tue Mar 27 23:24:32 2018
 import copy
 import random
 import math
+import numpy as np
 
 random.seed(0)
+
+def sigmoid_np(x):  
+    output = 1/(1+np.exp(-x))  
+    return output  
+print(sigmoid_np(np.array([1,2,3])))
 # compute sigmoid nonlinearity  
-def sigmoid(x):  
-    output = 1/(1+math.exp(-x))  
-    return output   
+def sigmoid(x): 
+    output = []
+    temp = 0
+    for i in range(len(x[0])):
+        temp = 1/(1+math.exp(-x[0][i])) 
+        output.append(temp)
+    return [output]  
+print(sigmoid([[1,2,3]]))
 # convert output of sigmoid function to its derivative  
 def sigmoid_output_to_derivative(output):  
     return output*(1-output)  
 def matrixMul2(A, B):
     return [[sum(a * b for a, b in zip(a, b)) for b in zip(*B)] for a in A]
-
+a = [[1]]
+b = [[1,2,3]]
+c = matrixMul2(a,b)
 def creat_matrix(x,y,start=0,step=1):  
      N=[]  
      F=[]  
@@ -40,7 +53,13 @@ def random_creat_matrix(x,y,start=0,step=1):
 #             start += step  
          N.append(F)  
          F=[]  
-     return N  
+     return N 
+
+length_flavor = 50
+train_x = [i for i in range(1,length_flavor+1)]
+train_y = []
+for i in range(length_flavor):
+    train_y.append(int(2*random.random()))
 
 int2binary = {}  
 binary_dim = 8 
@@ -59,12 +78,30 @@ synapse_0_update = creat_matrix(len(synapse_0),len(synapse_0[0]))
 synapse_1_update = creat_matrix(len(synapse_1),len(synapse_1[0]))  
 synapse_h_update = creat_matrix(len(synapse_h),len(synapse_h[0])) 
 
+# training logic  
+for j in range(10):  
+    overallError = 0  
 
+    layer_2_deltas = list()  
+    layer_1_values = list()  
+    layer_1_values.append([0 for i in range(hidden_dim)])  
+    
+    overallError = 0  
+    layer_2_deltas = list()  
+    layer_1_values = list()  
+    layer_1_values.append([0 for i in range(hidden_dim)])
 
-
-
-
-
+    train_index = random.randint(0,length_flavor-1)
+    print(train_index)
+    x = [[train_x[train_index]]]
+    y = [[train_y[train_index]]]
+    
+    layer_1 = sigmoid(matrixMul2(x,synapse_0) + matrixMul2([layer_1_values[-1]],synapse_h))  
+    layer_2 = sigmoid(matrixMul2(layer_1,synapse_1))  
+    
+    layer_2_error = y - layer_2
+    layer_2_deltas.append((layer_2_error)*sigmoid_output_to_derivative(layer_2))  
+    overallError += np.abs(layer_2_error[0])  
 
 
 
