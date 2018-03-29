@@ -39,9 +39,10 @@ def sigmoid_output_to_derivative(output):
 print(sigmoid_output_to_derivative([[1,2,3]]))
 def matrixMul2(A, B):
     return [[sum(a * b for a, b in zip(a, b)) for b in zip(*B)] for a in A]
-a = [[1]]
-b = [[1,2,3]]
+a = [[1.5]]
+b = [[1,2.5,3.5]]
 c = matrixMul2(a,b)
+print(c)
 def creat_matrix(x,y,start=0,step=1):  
      N=[]  
      F=[]  
@@ -63,13 +64,52 @@ def random_creat_matrix(x,y,start=0,step=1):
          N.append(F)  
          F=[]  
      return N 
+def matrix_add(x,y):
+    temp = creat_matrix(len(x),len(x[0]))
+    for i in range(len(x)):
+        for j in range(len(x[0])):
+            temp[i][j] = x[i][j] + y[i][j]
+    return temp
 
-length_flavor = 50
-train_x = [i for i in range(1,length_flavor+1)]
-train_y = []
-for i in range(length_flavor):
-    train_y.append(int(2*random.random()))
+def matrix_sub(x,y):
+    temp = creat_matrix(len(x),len(x[0]))
+    for i in range(len(x)):
+        for j in range(len(x[0])):
+            temp[i][j] = x[i][j] - y[i][j]
+    return temp
 
+
+def matrix_mul(x,y):
+    temp = creat_matrix(len(x),len(x[0]))
+    for i in range(len(x)):
+        for j in range(len(x[0])):
+            temp[i][j] = x[i][j] * y[i][j]
+    return temp
+
+def matrix_mul_single(x,y):
+    temp = creat_matrix(len(x),len(x[0]))
+    for i in range(len(x)):
+        for j in range(len(x[0])):
+            temp[i][j] = x[i][j] * y
+    return temp
+a = [[1,2,3]]
+b = 0.1
+print(matrix_mul_single(a,b)) 
+def abs_matrix(x):
+    for i in range(len(x)):
+        for j in range(len(x[0])):
+            x[i][j] = abs(x[i][j])
+    return x
+
+def matrix_trans(matrix):
+    return [[row[col] for row in matrix] for col in range(len(matrix[0]))]
+matrix = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
+matrix_trans(matrix) 
+length_flavor = 10
+train_x = [1,2,3,4,5,6,7,8,9,10]
+train_y = [2,4,6,8,10,12,14,16,18,20]
+#for i in range(length_flavor):
+#    train_y.append(int(2*random.random()))
 int2binary = {}  
 binary_dim = 8 
 # input variables  
@@ -87,36 +127,62 @@ synapse_0_update = creat_matrix(len(synapse_0),len(synapse_0[0]))
 synapse_1_update = creat_matrix(len(synapse_1),len(synapse_1[0]))  
 synapse_h_update = creat_matrix(len(synapse_h),len(synapse_h[0])) 
 
-# training logic  
-for j in range(10):  
-    overallError = 0  
-
-    layer_2_deltas = list()  
-    layer_1_values = list()  
-    layer_1_values.append([0 for i in range(hidden_dim)])  
-    
+# training logic 
+for j in range(1000):
     overallError = 0  
     layer_2_deltas = list()  
     layer_1_values = list()  
-    layer_1_values.append([0 for i in range(hidden_dim)])
+    layer_1_values.append([[0 for i in range(hidden_dim)]])
+    for train_index in range(length_flavor):   
+#        train_index = random.randint(0,length_flavor-1)
+        x = [[train_x[train_index]]]
+        y = [[train_y[train_index]]]
+        
+        layer_1 = sigmoid(matrixMul2(x,synapse_0) + matrixMul2(layer_1_values[-1],synapse_h))  
+        layer_2 = sigmoid(matrixMul2(layer_1,synapse_1))  
+        
+        layer_2_error = matrix_sub(y,layer_2)
+        layer_2_deltas.append(matrix_mul(layer_2_error,sigmoid_output_to_derivative(layer_2)))  
+        overallError += abs(layer_2_error[0][0])  
+        
+        z = layer_2[0][0]
+        layer_1_values.append(copy.deepcopy(layer_1))
+    future_layer_1_delta = creat_matrix(1,hidden_dim)
+    for back_index in range(length_flavor-1,-1,-1):  
+        x = [[train_x[back_index]]]
+        layer_1 = layer_1_values[back_index]
+        prev_layer_1 = layer_1_values[back_index - 1]
+        layer_2_delta = layer_2_deltas[back_index]
+#        layer_1_delta = matrix_mul((matrixMul2(future_layer_1_delta,matrix_trans(synapse_h)) + matrixMul2(layer_2_delta,matrix_trans(synapse_1))),sigmoid_output_to_derivative(layer_1))
+        m1 = matrixMul2(future_layer_1_delta,matrix_trans(synapse_h))    
+        m2 = matrixMul2(layer_2_delta,matrix_trans(synapse_1))
+        m3 = sigmoid_output_to_derivative(layer_1)
+        m4 = matrix_sub(m1,m2)
+        layer_1_delta = matrix_mul(m3,m4)
+        
+        synapse_1_update = matrix_add(synapse_1_update,matrixMul2(matrix_trans(layer_1),layer_2_delta))
+        synapse_h_update = matrix_add(synapse_h_update,matrixMul2(matrix_trans(prev_layer_1),layer_1_delta))
+        synapse_0_update = matrix_add(synapse_0_update,matrixMul2(matrix_trans(x),layer_1_delta))
+        
+    synapse_0 = matrix_add(synapse_0,matrix_mul_single(synapse_0_update,alpha))
+    synapse_1 = matrix_add(synapse_1,matrix_mul_single(synapse_1_update,alpha))
+    synapse_h = matrix_add(synapse_h,matrix_mul_single(synapse_h_update,alpha))
+    synapse_0_update = creat_matrix(len(synapse_0),len(synapse_0[0]))  
+    synapse_1_update = creat_matrix(len(synapse_1),len(synapse_1[0]))  
+    synapse_h_update = creat_matrix(len(synapse_h),len(synapse_h[0])) 
+    if(j % 100 == 0):
+        print('j',j)
+        print("Error:" , str(overallError))
+        print('index:',str(train_index))
+        print('days:',  str(x))
+        print("True:" , str(y))   
+        print("Pred:" , str(z))
+        print("layer_1:" , str(layer_1))
+        print("synapse_1:" , str(synapse_1))
+        print( "------------" )
+#print(matrixMul2(layer_1,synapse_1))  
 
-    train_index = random.randint(0,length_flavor-1)
-    print(train_index)
-    x = [[train_x[train_index]]]
-    y = [[train_y[train_index]]]
-    
-    layer_1 = sigmoid(matrixMul2(x,synapse_0) + matrixMul2([layer_1_values[-1]],synapse_h))  
-    layer_2 = sigmoid(matrixMul2(layer_1,synapse_1))  
-    
-    layer_2_error = y - layer_2
-    layer_2_deltas.append((layer_2_error)*sigmoid_output_to_derivative(layer_2))  
-    overallError += abs(layer_2_error[0])  
 
-a = [[1,2,3]]
-b = [[2,1,3]]
-print(a - b)
-a = [[1,2,3]]
-b = [[2,1,3]]
-print(a - b)
-print()
+   
+         
 
