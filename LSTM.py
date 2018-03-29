@@ -59,7 +59,7 @@ def random_creat_matrix(x,y,start=0,step=1):
      F=[]  
      for i in range(x):                  #等价于for(i=0,i<x,i++)  
          for j in range(y):              
-             F.append(random.random())  
+             F.append(0.1)  
 #             start += step  
          N.append(F)  
          F=[]  
@@ -77,7 +77,6 @@ def matrix_sub(x,y):
         for j in range(len(x[0])):
             temp[i][j] = x[i][j] - y[i][j]
     return temp
-
 
 def matrix_mul(x,y):
     temp = creat_matrix(len(x),len(x[0]))
@@ -103,19 +102,16 @@ def abs_matrix(x):
 
 def matrix_trans(matrix):
     return [[row[col] for row in matrix] for col in range(len(matrix[0]))]
-matrix = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
-matrix_trans(matrix) 
+
 length_flavor = 10
 train_x = [1,2,3,4,5,6,7,8,9,10]
 train_y = [2,4,6,8,10,12,14,16,18,20]
 #for i in range(length_flavor):
 #    train_y.append(int(2*random.random()))
-int2binary = {}  
-binary_dim = 8 
 # input variables  
-alpha = 0.1  
+alpha = 1
 input_dim = 1 
-hidden_dim = 16  
+hidden_dim = 8 
 output_dim = 1 
 
 # initialize neural network weights  
@@ -126,7 +122,7 @@ synapse_h = random_creat_matrix(hidden_dim,hidden_dim)
 synapse_0_update = creat_matrix(len(synapse_0),len(synapse_0[0]))  
 synapse_1_update = creat_matrix(len(synapse_1),len(synapse_1[0]))  
 synapse_h_update = creat_matrix(len(synapse_h),len(synapse_h[0])) 
-
+count = 10
 # training logic 
 for j in range(1000):
     overallError = 0  
@@ -138,16 +134,27 @@ for j in range(1000):
         x = [[train_x[train_index]]]
         y = [[train_y[train_index]]]
         
-        layer_1 = sigmoid(matrixMul2(x,synapse_0) + matrixMul2(layer_1_values[-1],synapse_h))  
-        layer_2 = sigmoid(matrixMul2(layer_1,synapse_1))  
-        
-        layer_2_error = matrix_sub(y,layer_2)
+        layer_1 = sigmoid(matrix_add(matrixMul2(x,synapse_0),matrixMul2(layer_1_values[-1],synapse_h)))  
+        layer_2 = sigmoid(matrixMul2(layer_1,synapse_1))
+#        if(j % 100 == 0):
+#            print("layer_1:" , str(layer_1))
+#            print("synapse_1:" , str(synapse_1))
+#            print('sig',matrixMul2(layer_1,synapse_1))
+        layer_2_error = matrix_sub(sigmoid(y),sigmoid(layer_2))
         layer_2_deltas.append(matrix_mul(layer_2_error,sigmoid_output_to_derivative(layer_2)))  
+#        if(count >= 0):
+#            count = count - 1
+#            print('x',x)
+#            print('y',y)
+#            print('layer_1',layer_1)
+#            print('layer_2',layer_2)
+#            print('layer_2_error',layer_2_error)
+#            print('layer_2_deltas[-1][-1]',layer_2_deltas[-1][-1])
         overallError += abs(layer_2_error[0][0])  
-        
+        days = x
         z = layer_2[0][0]
         layer_1_values.append(copy.deepcopy(layer_1))
-    future_layer_1_delta = creat_matrix(1,hidden_dim)
+    future_layer_1_delta = [[0 for i in range(hidden_dim)]]
     for back_index in range(length_flavor-1,-1,-1):  
         x = [[train_x[back_index]]]
         layer_1 = layer_1_values[back_index]
@@ -157,13 +164,15 @@ for j in range(1000):
         m1 = matrixMul2(future_layer_1_delta,matrix_trans(synapse_h))    
         m2 = matrixMul2(layer_2_delta,matrix_trans(synapse_1))
         m3 = sigmoid_output_to_derivative(layer_1)
-        m4 = matrix_sub(m1,m2)
-        layer_1_delta = matrix_mul(m3,m4)
-        
+        m4 = matrix_add(m1,m2)
+        layer_1_delta = matrix_mul(m4,m3)
+         
         synapse_1_update = matrix_add(synapse_1_update,matrixMul2(matrix_trans(layer_1),layer_2_delta))
         synapse_h_update = matrix_add(synapse_h_update,matrixMul2(matrix_trans(prev_layer_1),layer_1_delta))
         synapse_0_update = matrix_add(synapse_0_update,matrixMul2(matrix_trans(x),layer_1_delta))
-        
+        future_layer_1_delta = layer_1_delta
+#        if(j % 100 == 0):
+#            print('layer_2_delta',layer_2_delta)
     synapse_0 = matrix_add(synapse_0,matrix_mul_single(synapse_0_update,alpha))
     synapse_1 = matrix_add(synapse_1,matrix_mul_single(synapse_1_update,alpha))
     synapse_h = matrix_add(synapse_h,matrix_mul_single(synapse_h_update,alpha))
@@ -174,13 +183,11 @@ for j in range(1000):
         print('j',j)
         print("Error:" , str(overallError))
         print('index:',str(train_index))
-        print('days:',  str(x))
+        print('days:',  str(days))
         print("True:" , str(y))   
         print("Pred:" , str(z))
-        print("layer_1:" , str(layer_1))
-        print("synapse_1:" , str(synapse_1))
         print( "------------" )
-#print(matrixMul2(layer_1,synapse_1))  
+print(matrixMul2(layer_1,synapse_1))  
 
 
    
