@@ -180,6 +180,9 @@ for j in range(1000):
         print("layer_1:" , str(layer_1))
         print("synapse_1:" , str(synapse_1))
         print( "------------" )
-print(matrixMul2(layer_1,synapse_1))     
+#print(matrixMul2(layer_1,synapse_1))  
+
+
+   
          
 
