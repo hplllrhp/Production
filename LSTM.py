@@ -1,4 +1,4 @@
-r# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 """
 Created on Tue Mar 27 23:24:32 2018
 
@@ -59,7 +59,7 @@ def random_creat_matrix(x,y,start=0,step=1):
      F=[]  
      for i in range(x):                  #等价于for(i=0,i<x,i++)  
          for j in range(y):              
-             F.append(0.1)  
+             F.append(2*random.random()-1)  
 #             start += step  
          N.append(F)  
          F=[]  

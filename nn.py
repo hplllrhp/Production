@@ -27,8 +27,7 @@ syn0 = 2*np.random.random((1,1)) - 1
 for j in range(100):
     x = np.array([[random.randint(4,45)*0.1]])
     y = 0.2*x
-    print('x',x,'y',y)
-    for iter in range(10000):
+    for iter in range(1000):
         # forward propagation
         l0 = x
         l1 = nonlin(np.dot(l0,syn0))
@@ -42,9 +41,8 @@ for j in range(100):
         # update weights
         syn0 += np.dot(l0.T,l1_delta)
     #    print('np.dot',np.dot(l0.T,l1_delta),'\n','syn0','\n',syn0,'\n')
-    if(j%1 == 0):
-        print("Output After Training:")
+    if(j%10 == 0):
+        print("Output After Training:----------------------")
         print('x',x,'y',y,'predict',l1)
         print(l1_error)
-print(nonlin(np.dot(2,syn0)))
 
